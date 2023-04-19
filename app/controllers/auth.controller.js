@@ -14,12 +14,10 @@ const signUp = async (req, res) => {
       email: req.body.email,
       password: bcryptjs.hashSync(req.body.password, 8),
     });
-    console.log("here");
     if (req.body.roles) {
       const roles = await Role.findAll({
         where: { name: { [Op.or]: req.body.roles } },
       });
-      console.log("what");
       await user.setRoles(roles);
       return res.send({ message: "User was registered successfully!" });
     }

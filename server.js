@@ -17,8 +17,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 db.sequelize.sync().then(() => {
-  console.log("Drop and resync database");
-  // initial();
 });
 
 function initial() {

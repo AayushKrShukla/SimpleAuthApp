@@ -6,7 +6,7 @@ const User = db.user;
 const { verify, sign } = jwt;
 
 const verifyToken = (req, res, next) => {
-  let token = req.headers["s-access-token"];
+  let token = req.headers["x-access-token"];
 
   if (!token) {
     return res.status(403).send({ message: "No token provided!" });
@@ -24,9 +24,10 @@ const verifyToken = (req, res, next) => {
 };
 
 const isAdmin = async (req, res, next) => {
-  const user = await User.findByPk(req.userId);
-  const roles = await user.getRoles();
-  if (roles.some((el) => el === "admin")) {
+  const user = await User.findByPk(req.userId, {
+    include: [{ model: db.role }],
+  });
+  if (user.roles.some((el) => el.name === "admin")) {
     next();
     return;
   }
@@ -37,23 +38,25 @@ const isAdmin = async (req, res, next) => {
 };
 
 const isMod = async (req, res, next) => {
-  const user = await User.findByPk(req.userId);
-  const roles = await user.getRoles();
-  if (roles.some((el) => el === "moderator")) {
+  const user = await User.findByPk(req.userId, {
+    include: [{ model: db.role }],
+  });
+  if (user.roles.some((el) => el.name === "moderator")) {
     next();
     return;
   }
 
   res.status(403).send({
-    message: "Require Admin Role!",
+    message: "Require Mod Role!",
   });
   return;
 };
 
 const isModOrAdmin = async (req, res, next) => {
-  const user = await User.findByPk(req.userId);
-  const roles = await user.getRoles();
-  if (roles.some((el) => el === "admin" || el === "moderator")) {
+  const user = await User.findByPk(req.userId, {
+    include: [{ model: db.role }],
+  });
+  if (user.roles.some((el) => el.name === "admin" || el.name === "moderator")) {
     next();
     return;
   }
